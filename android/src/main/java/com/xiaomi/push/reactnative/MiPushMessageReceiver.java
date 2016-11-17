@@ -204,6 +204,7 @@ public  class MiPushMessageReceiver extends PushMessageReceiver {
 
         Bundle bundle = new Bundle();
         bundle.putString("data", message.toString());
+        bundle.putString("regid", message.getCommandArguments().toString());
         bundle.putString("type", MiPushModule.MiPush_didRegisterForRemoteNotificationsWithDeviceToken);
         MiPushModule.sendEvent(bundle);
 

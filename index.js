@@ -44,7 +44,7 @@ export default class MiPushNotification {
 
     static getRegistrationID(){
         return new Promise(resolve=>{
-            nativeModule.getRegistrationID(resolve)
+            nativeModule.getRegId(resolve)
         })
     }
 

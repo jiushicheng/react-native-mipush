@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.xiaomi.mipush.sdk.ErrorCode;
 import com.xiaomi.mipush.sdk.MiPushClient;
@@ -47,16 +49,14 @@ public class MiPushModule extends ReactContextBaseJavaModule {
     private static Boolean registered = false;
     private static MiPushModule gModules = null;
     private static String holdMessage = null;
-    private static String APP_ID = "2882303761517499178";
-    private static String APP_KEY = "5111749999178";
 
     private static String deviceId = null;
 
-    public MiPushModule(ReactApplicationContext reactContext) {
+    public MiPushModule(ReactApplicationContext reactContext, String app_id, String app_key) {
         super(reactContext);
         if (!registered) {
             Log.d(TAG, "register");
-            MiPushClient.registerPush(reactContext, APP_ID, APP_KEY);
+            MiPushClient.registerPush(reactContext, app_id, app_key);
             registered = true;
             gModules = this;
             try {
@@ -65,7 +65,9 @@ public class MiPushModule extends ReactContextBaseJavaModule {
             } catch (Exception e) {
                 deviceId = "unknow";
             }
-
+            Log.d(TAG, "deviceid: "+ deviceId);
+            String regid = MiPushClient.getRegId(reactContext);
+            Log.d(TAG, "regid: "+ regid);
         }
     }
 
@@ -98,11 +100,31 @@ public class MiPushModule extends ReactContextBaseJavaModule {
     public static void sendEvent(Bundle bundle) {
         if (gModules != null){
             bundle.putString("device_id", deviceId);
-            WritableMap message = Arguments.fromBundle(bundle);
-            Log.d(TAG, message.toString());
-            DeviceEventManagerModule.RCTDeviceEventEmitter emitter = gModules.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
-            emitter.emit("mipush", message);
-            return;
+            final WritableMap message = Arguments.fromBundle(bundle);
+            Log.d(TAG, "sendEvent: " + message.toString());
+            Log.d(TAG, "hasActiveCatalystInstance: "+gModules.getReactApplicationContext().hasActiveCatalystInstance());
+            if (! gModules.getReactApplicationContext().hasActiveCatalystInstance()) {
+                TimerTask task = new TimerTask(){
+
+                    public void run(){
+                        Log.d(TAG, "sendEvent_TimerTask: " + message.toString());
+                        DeviceEventManagerModule.RCTDeviceEventEmitter emitter = gModules.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+                        emitter.emit("mipush", message);
+
+                    }
+
+                };
+
+                Timer timer = new Timer();
+
+                timer.schedule(task, 2000);
+            } else {
+                //gModules.getReactApplicationContext().;
+                DeviceEventManagerModule.RCTDeviceEventEmitter emitter = gModules.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+                emitter.emit("mipush", message);
+                return;
+            }
+
         }
         else {
             Log.e(TAG, "sendEvent gModules is null.");
@@ -218,7 +240,8 @@ public class MiPushModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
         public void getRegId(Promise promise) {
-            MiPushClient.getRegId(getReactApplicationContext());
+            String regid = MiPushClient.getRegId(getReactApplicationContext());
+            //promise.resolve(regid);
         }
 
     private Set _stringArrayToSet(ReadableArray array) {
