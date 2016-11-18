@@ -8,8 +8,7 @@ react-native-mipush,是对小米推送服务的封装，适用于ios和android�
 
 # Install
 
-
-git clone http://github.com/iamyh/react-native-mipush.git $YOUR_PROJECT/node_modules/
+npm install --save  https://github.com/shuidaocar/react-native-mipush.git
 
 ## IOS
 * 在[dev.xiaomi.com](http://dev.xiaomi.com)将申请到的appid，appkey填写到对应的info.plist的MiSDKAppID，MiSDKAppKey。额外添加一个MiSDKRun，值为${MiSDKRun}。这个值是在Build Settings -> 点击+ -> Add User-Defined Setting中添加MiSDKRun，Debug的时候值为Debug，release的时候为Online。
@@ -63,18 +62,25 @@ git clone http://github.com/iamyh/react-native-mipush.git $YOUR_PROJECT/node_mod
 ```
 
 ## Android
-* 修改MiPushModule.java里面的APP_ID，APP_KEY(node_modules里面的java源文件)
 * 修改MainActivity.java
 
 ```
 import com.xiaomi.push.reactnative.MiPushPackage;
 
-@Override
-protected List<ReactPackage> getPackages() {
-    return Arrays.<ReactPackage>asList(
-            new MiPushPackage()
-    );
-}
+private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+        @Override
+        protected boolean getUseDeveloperSupport() {
+            return BuildConfig.DEBUG;
+        }
+
+
+        @Override
+        protected List<ReactPackage> getPackages() {
+            return Arrays.<ReactPackage>asList(
+                    new MiPushPackage(mipush_app_id, mipush_app_key),
+            );
+        }
+    };    
     
 修改项目的AndroidManifest.xml:
     <uses-permission android:name="android.permission.GET_TASKS" />
