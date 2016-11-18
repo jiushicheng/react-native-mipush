@@ -62,7 +62,7 @@ npm install --save  https://github.com/shuidaocar/react-native-mipush.git
 ```
 
 ## Android
-* 修改MainActivity.java
+* 修改MainApplication.java
 
 ```
 import com.xiaomi.push.reactnative.MiPushPackage;
