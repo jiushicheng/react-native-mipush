@@ -180,7 +180,6 @@ public  class MiPushMessageReceiver extends PushMessageReceiver {
         }
 
         bundle.putString("data", message.toString());
-        bundle.putString("messageId", message.getMessageId());
         MiPushModule.sendEvent(bundle);
     }
 
@@ -199,7 +198,6 @@ public  class MiPushMessageReceiver extends PushMessageReceiver {
                 Bundle bundle = new Bundle();
                 bundle.putString("error", message.toString());
                 bundle.putString("type", MiPushModule.MiPush_didFailToRegisterForRemoteNotificationsWithError);
-                bundle.putString("messageId", message.getMessageId());
                 MiPushModule.sendEvent(bundle);
                 return;
             }
@@ -211,7 +209,6 @@ public  class MiPushMessageReceiver extends PushMessageReceiver {
         bundle.putString("data", message.toString());
         bundle.putString("regid", message.getCommandArguments().toString());
         bundle.putString("type", MiPushModule.MiPush_didRegisterForRemoteNotificationsWithDeviceToken);
-        bundle.putString("messageId", message.getMessageId());
         MiPushModule.sendEvent(bundle);
 
     }
