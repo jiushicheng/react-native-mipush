@@ -3,25 +3,70 @@
 react-native-mipush,是对小米推送服务的封装，适用于ios和android。
 
 
-
-
-
 # Install
 
+```
 npm install --save  https://github.com/shuidaocar/react-native-mipush.git
+```
+# Link
 
-## IOS
-* 在[dev.xiaomi.com](http://dev.xiaomi.com)将申请到的appid，appkey填写到对应的info.plist的MiSDKAppID，MiSDKAppKey。额外添加一个MiSDKRun，值为${MiSDKRun}。这个值是在Build Settings -> 点击+ -> Add User-Defined Setting中添加MiSDKRun，Debug的时候值为Debug，release的时候为Online。
-* 引入RCTMiPush.xcodeproj.在项目下面的Libraries，右击Add Files To "YOUR PROJECT",选择node_modules/react-native-mipush的ios项目
-* 添加lib,headers.在YOUR_PROJECT的General -> Linked Frameworks and Libraries 添加libxml2.dylib,libresolv.dylib,libz.dylib,libMiPushSDK.so,MobileCoreService.framework,SystemConfigration.framework.在YOUR_PROJECT的Build Settings -> Search Paths -> Header Search Path添加上$(SRCROOT)/../node_modules/react-native-mipush/ios recursive
-* 修改Appdelegate.m.
+### Auto Link
+
+```
+react-native link react-native-mipush
+```
+
+### Manual Link
+
+#####IOS
+- 引入RCTMiPush.xcodeproj。
+	- 在项目下面的Libraries，右击Add Files To "YOUR PROJECT",选择node_modules/react-native-mipush的ios项目
+- 添加头文件搜索路径
+	- 在YOURPROJECT的Build Settings -> Search Paths -> Header Search Path添加上$(SRCROOT)/../node_modules/react-native-mipush/ios，选中recursive
+
+##### Android
+
+- 往settings.gradle添加:
+
+```
+include ':react-native-mipush'
+project(':react-native-mipush').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-mipush/android')
+```
+
+- 修改app/build.gradle里面的dependencies:
+
+```
+compile project(':react-native-mipush')
+compile fileTree(dir: "libs", include: ["*.jar"])
+```
+
+# 配置
+
+### iOS
+- 前往[dev.xiaomi.com](http://dev.xiaomi.com)申请到的appid，appkey。
+- 前往info.plist添加MiSDKAppID、MiSDKAppKey、MiSDKRun。
+	- MiSDKAppID对应appid，MiSDKAppKey对应appkey
+	- MiSDKRun值为${MiSDKRun}，在Build Settings -> 点击+ -> Add User-Defined Setting中添加MiSDKRun，Debug的时候值为Debug，release的时候为Online。
+- 添加lib。在YOUR_PROJECT的General -> Linked Frameworks and Libraries 添加
+
+```
+libxml2.dylib
+libresolv.dylib
+libz.dylib
+MobileCoreService.framework
+SystemConfigration.framework
+```
+
+- 修改Appdelegate.m.
 
 ```
 #import "RCTMiPush.h"
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {  
-  [RCTMiPush didFinishLaunchingWithOptions:launchOptions];
+  [RCTMiPush performSelector:@selector(didFinishLaunchingWithOptions:) withObject:launchOptions afterDelay: 1.0];
+  //[RCTMiPush didFinishLaunchingWithOptions:launchOptions];
+
   return YES;
 }
 
@@ -61,7 +106,8 @@ npm install --save  https://github.com/shuidaocar/react-native-mipush.git
 }
 ```
 
-## Android
+### Android
+
 * 修改MainApplication.java
 
 ```
@@ -146,20 +192,6 @@ private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     </application>
 ```
 
-* 往settings.gradle添加:
-
-```
-include ':react-native-mipush'
-project(':react-native-mipush').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-mipush/android')
-```
-
-* 修改app/build.gradle里面的dependencies:
-
-```
-compile project(':react-native-mipush')
-compile fileTree(dir: "libs", include: ["*.jar"])
-```
-
 ## Server
 参考官方的用法即可
 
@@ -170,15 +202,20 @@ compile fileTree(dir: "libs", include: ["*.jar"])
 import  MiPush from 'react-native-mipush';
 
 class App extends Component {
-	componentDidMount() {
-		MiPush.registerMiPushAndConnect();
-		this.pushlisteners = [
-     		MiPush.addEventListener("mipush", this.onReceiveMessage.bind(this))
-		];
-	}
-	onReceiveMessage(message) {
-		//alert(messsage);所有的消息都会回调到这里
-	}
+  componentDidMount() {
+    MiPush.registerMiPushAndConnect();
+    this.pushlisteners = [
+      MiPush.addEventListener("mipush", this.onReceiveMessage.bind(this))
+    ];
+  }
+  onReceiveMessage(message) {
+    //alert(messsage);所有的消息都会回调到这里
+  }
+  componentWillUnmount() {
+    this.pushlisteners.forEach(listener => {
+      MiPush.removeEventListener(listener);
+    });
+  }
 }
 
 在其他需要的地方：
