@@ -103,7 +103,7 @@ public class MiPushModule extends ReactContextBaseJavaModule {
             final WritableMap message = Arguments.fromBundle(bundle);
             Log.d(TAG, "sendEvent: " + message.toString());
             Log.d(TAG, "hasActiveCatalystInstance: "+gModules.getReactApplicationContext().hasActiveCatalystInstance());
-            if (! gModules.getReactApplicationContext().hasActiveCatalystInstance()) {
+            if (gModules.getReactApplicationContext().hasActiveCatalystInstance()) {
                 TimerTask task = new TimerTask(){
 
                     public void run(){
